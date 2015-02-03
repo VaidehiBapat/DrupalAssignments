@@ -1,0 +1,104 @@
+<?php
+
+/**
+ * @file
+ * products_listing module.
+ */
+
+    /**
+    * Implements hook_menu().
+    */
+    function products_listing_menu() {
+		$items['products/content'] = array(
+			'title' => 'Products content page',
+			'page callback' => 'products_node_listing_func',
+			'access arguments' => array('access content'),
+		);
+		return $items;     
+    }
+
+	// callback function for menu page
+	function products_node_listing_func() {
+		// select fields to apply sort
+		$header = array(
+			array(
+			  "data" => t('Nid')
+			),
+			array(
+			  "data" => t('Title'),
+			  "field" => "title"
+			),
+			array(
+			  "data" => t('Price'),
+			  "field" => "product_price"
+			),
+			array(
+			  "data" => t('Status')
+			),
+			array(
+			  "data" => t('Created'),
+			  "field" => "created"
+			),
+			array(
+			  "data" => t('Updated')
+			),
+		  );
+		  
+		$output = ""; 	
+		
+		//Fetch Node ids of product content type
+		$nids = db_select('node', 'n')
+		->fields('n', array('nid'))
+		->condition('n.type', 'product')
+		->extend('TableSort')
+		->orderByHeader($header)		
+		->extend('PagerDefault')
+		->limit(10)
+		->execute()
+		->fetchCol(); 
+		
+		$nodes = node_load_multiple($nids);
+		foreach($nodes as $list){
+			if($list->status == 1){
+				$list->status = 'published';
+			}
+			else{
+				$list->status = 'unpublished';
+			}
+		}
+		   
+		$rows = array();
+		  
+		// Looping for filling the table rows
+		  foreach($nodes as $data){
+			// Fill the table rows
+			$rows[] = array(
+			  $data->nid,
+			  $data->title,
+			  $data->product_price[und][0][value],
+			  $data->status,
+			  'created'=>date('d-m-Y',strtotime($data->created)),
+			  'Updated'=>date('d-m-Y',strtotime($data->changed))
+			);
+		  }
+
+		  
+		// Output of table with the paging
+		  $output = theme_table(
+			array(
+			  "header" => $header,
+			  "rows" => $rows,
+			  "attributes" => array("width"=>"100%"),
+			  "sticky" => true, // Table header will be sticky
+			  "caption" => "",
+			  "colgroups" => array(),
+			  "empty" => t("Table has no row!") // The message to be displayed if table is empty
+			)
+		  ).theme("pager");
+
+		  return $output;
+		
+	}
+	
+	
+	

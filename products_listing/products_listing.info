@@ -1,0 +1,11 @@
+name = Products node listing
+description = Lists all nodes of custom content type called products with custom fields.
+core = 7.x
+
+
+; Information added by Drupal.org packaging script on 2014-01-06
+version = "7.x-1.3"
+core = "7.x"
+package = Products Custom Content Type
+
+

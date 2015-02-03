@@ -19,16 +19,17 @@ function products_install() {
  * Implements hook_uninstall().
  */
 function products_uninstall() {
-    $ournewtype = 'product';
-    $sql = 'SELECT nid FROM {node} n WHERE n.type = :type';
-    $result = db_query($sql, array(':type' => $ournewtype));
+    $query = db_select('node', 'n')
+      ->condition('type', 'product')
+      ->fields('n');
+	$result = $query->execute()->fetchAll();
     $nodeids = array();
     foreach ($result as $row) {
         $nodeids[] = $row->nid;
     }
     node_delete_multiple($nodeids);
     delete_custom_fields();
-    node_type_delete($ournewtype);
+    node_type_delete('product');
     field_purge_batch(500);
 }
 
@@ -37,12 +38,12 @@ function products_uninstall() {
  */
 
 function _products_installed_fields() {
-    $t = get_t();
+    //$t = get_t();
     return array(
         'product_price' => array(
             'field_name' => 'product_price',
-            'label' => $t('Price'),
-            'type' => 'text'
+            'label' => t('Price'),
+            'type' => 'number_integer'
         )
     );
 }
@@ -56,7 +57,7 @@ function _products_installed_instances() {
     return array(
         'product_price' => array(
             'field_name' => 'product_price',
-            'type' => 'text',
+            'type' => 'number_integer',
             'label' => $t('Price'),
             'widget' => array(
                 'type' => 'text_textfield'
@@ -64,7 +65,7 @@ function _products_installed_instances() {
             'display' => array(
                 'example_node_list' => array(
                     'label' => $t('Price'),
-                    'type' => 'text'
+                    'type' => 'number_integer'
                 )
             )
         )
