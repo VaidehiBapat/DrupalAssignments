@@ -29,8 +29,7 @@
 			  "field" => "title"
 			),
 			array(
-			  "data" => t('Price'),
-			  "field" => "product_price"
+			  "data" => t('Price')
 			),
 			array(
 			  "data" => t('Status')
