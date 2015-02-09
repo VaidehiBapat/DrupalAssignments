@@ -1,0 +1,7 @@
+name = DCM registration module
+description = takes user registration details and stores them into custom table.
+core = 7.x
+package = DCM registration
+
+
+

@@ -1,0 +1,158 @@
+<?php
+
+/**
+ * @file
+ * dcm_registration module file.
+ */
+/**
+ * Implements hook_menu().
+ */
+function dcm_registration_menu() {
+  $items['user_registration'] = array(
+    'title' => 'DCM user registration',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dcm_registration_form'),
+    'access arguments' => array('access content'),
+    'description' => 'DCM user registration page',
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+ 
+/**
+ * Implements hook_block_info().
+ */
+function dcm_registration_block_info() {
+  $blocks = array();
+  $blocks['user_registration'] = array(
+    'info' => t('User registration'),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function dcm_registration_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'user_registration':
+      $block = array(
+        'subject' => t('User registration'),
+        'content' => dcm_registration_user_registration_block(),
+      );
+      break;
+  }
+  return $block;
+}
+ 
+/**
+ * Search Block
+ */
+function dcm_registration_user_registration_block() {
+  return drupal_get_form('dcm_registration_form');
+}
+ 
+/**
+ * Implements hook_form().
+ */
+function dcm_registration_form($form, &$form_state){
+  $form['firstName'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First Name'),
+    '#required' => true,
+	'#size' => '25',
+	'#attributes' =>array('placeholder' => t('Enter your first name here'))
+  );
+  $form['lastName'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Last Name'),
+    '#required' => true,
+	'#size' => '25',
+	'#attributes' =>array('placeholder' => t('Enter your last name here'))
+  );
+  $form['mobileNumber'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Mobile Number'),
+    '#required' => true,
+	'#size' => '25',
+	'#attributes' =>array('placeholder' => t('Enter your mobile number here'))
+  );
+  $form['address'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Address'),
+    '#required' => true,
+	'#attributes' =>array('placeholder' => t('Enter your address here'))
+  );
+  $form['age'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Age'),
+    '#required' => true,
+	'#size' => '25',
+	'#attributes' =>array('placeholder' => t('Enter your age here')),
+	'#description' => t('The age can range from 18 to 60')
+  );
+  $form['country'] = array(
+    '#type' => 'select',
+    '#title' => t('Country'),
+	'#options' => array('India','USA','France','Germany','Japan'),
+    '#required' => true,
+  );
+  $form['subscription']=array(
+	'#type'=>'checkboxes',
+	'#title'=>t('Terms and conditions'),
+	'#options'=>array('I agree to terms and conditions'),
+	'#required' => true,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Register',
+  );
+  return $form;
+}
+/*
+* implements form validations 
+*/
+function dcm_registration_form_validate($form, $form_state) {
+
+  if(!preg_match("/^[a-zA-Z ]*$/",$form_state['values']['firstName']))
+    form_set_error('firstName','Please enter a valid first name');
+  if(!preg_match("/^[a-zA-Z ]*$/",$form_state['values']['lastName']))
+    form_set_error('lastName','Please enter a valid last name');
+  if(!preg_match('/^\d{10}$/', $form_state['values']['mobileNumber']))
+    form_set_error('mobileNumber','Please enter a valid mobile number');
+  if(is_null($form_state['values']['address']))
+    form_set_error('address','Please enter your address');
+  if(is_numeric($form_state['values']['age']))	{
+	if(intval($form_state['values']['age'])<18 || intval($form_state['values']['age'])>60 ){
+	  form_set_error('age','Please enter a valid age');
+	}
+  }
+  else{
+	form_set_error('age','Please enter a valid age');
+  }
+  if(is_null($form_state['values']['country']))
+    form_set_error('country','Please select a country');
+  if(is_null($form_state['values']['subscription']))
+    form_set_error('subscription','You need to agree to terms and conditions for registering');
+}
+/*
+* handles form submit
+*/
+function dcm_registration_form_submit($form, $form_state) {
+  //Add user details to dcm_registration_form table.
+  db_insert('dcm_registration_form')
+  ->fields(array(
+    'first_name' => $form_state['values']['firstName'],
+    'last_name' => $form_state['values']['lastName'],
+    'mobile_number' => $form_state['values']['mobileNumber'],
+    'address' => $form_state['values']['address'],
+    'age' => $form_state['values']['age'],
+    'country' => $form_state['values']['country']
+  ))
+  ->execute();
+  //Set success message
+  drupal_set_message("Details have been submitted successfully");
+}

@@ -69,33 +69,33 @@
 		$rows = array();
 		  
 		// Looping for filling the table rows
-		  foreach($nodes as $data){
-			// Fill the table rows
-			$rows[] = array(
-			  $data->nid,
-			  $data->title,
-			  $data->product_price[und][0][value],
-			  $data->status,
-			  'created'=>date('d-m-Y',strtotime($data->created)),
-			  'Updated'=>date('d-m-Y',strtotime($data->changed))
-			);
-		  }
+		foreach($nodes as $data){
+		// Fill the table rows
+		$rows[] = array(
+		  $data->nid,
+		  $data->title,
+		  $data->product_price[und][0][value],
+		  $data->status,
+		  'created'=>date('d-m-Y',$data->created),
+		  'Updated'=>date('d-m-Y',$data->changed)
+		);
+		}
 
 		  
 		// Output of table with the paging
-		  $output = theme_table(
-			array(
-			  "header" => $header,
-			  "rows" => $rows,
-			  "attributes" => array("width"=>"100%"),
-			  "sticky" => true, // Table header will be sticky
-			  "caption" => "",
-			  "colgroups" => array(),
-			  "empty" => t("Table has no row!") // The message to be displayed if table is empty
-			)
-		  ).theme("pager");
+		$output = theme_table(
+		array(
+		  "header" => $header,
+		  "rows" => $rows,
+		  "attributes" => array("width"=>"100%"),
+		  "sticky" => true, // Table header will be sticky
+		  "caption" => "",
+		  "colgroups" => array(),
+		  "empty" => t("Table has no row!") // The message to be displayed if table is empty
+		)
+		).theme("pager");
 
-		  return $output;
+		return $output;
 		
 	}
 	
